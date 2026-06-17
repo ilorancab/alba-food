@@ -1,0 +1,23 @@
+# Target compilation directories
+target/
+frontend/dist/
+frontend/node_modules/
+
+# Maven wrapper and local files
+.mvn/
+dependency-reduced-pom.xml
+
+# IDEs (IntelliJ IDEA, Eclipse, VS Code)
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+.vscode/
+
+# System logs and temp files
+*.log
+.DS_Store
+Thumbs.db

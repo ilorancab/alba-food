@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: alba-food-db
+    environment:
+      POSTGRES_DB: albafood
+      POSTGRES_USER: nacho
+      POSTGRES_PASSWORD: password
+      TZ: Europe/Madrid
+    # Descomenta las siguientes líneas si necesitas acceder a la BD desde fuera del contenedor (ej: DBeaver)
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: alba-food-app
+    # user: "${PUID:-1000}:${PGID:-1000}" # Activar solo en Raspberry/OMV
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: albafood
+      DB_USER: nacho
+      DB_PASSWORD: password
+      TZ: Europe/Madrid
+      JAVA_OPTS: "-Xmx512m -Xms256m"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  pgdata:
