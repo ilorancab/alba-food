@@ -8,8 +8,8 @@ import com.albafood.repository.FoodItemRepository;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
-import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,73 +24,52 @@ public class FoodService {
     }
 
     public List<FoodTriedResponse> getFoodsTried() {
-        List<FoodItem> catalog = foodItemRepository.findAll();
-        List<String> catalogNames = catalog.stream()
-                .map(item -> normalize(item.getName()))
-                .collect(Collectors.toList());
+        Map<String, FoodCategory> catalog = foodItemRepository.findAll().stream()
+                .collect(Collectors.toMap(
+                        item -> normalize(item.getName()),
+                        FoodItem::getCategory,
+                        (a, b) -> a));
 
-        List<Object[]> raw = feedingRepository.findFoodsGrouped();
-        Map<String, FoodTriedResponse> result = new LinkedHashMap<>();
-
-        for (Object[] row : raw) {
-            String rawName = (String) row[0];
-            LocalDate lastDate = ((java.sql.Date) row[1]).toLocalDate();
-            long count = (long) row[2];
-
-            String normalized = normalize(rawName);
-            FoodCategory category = matchCategory(normalized, catalogNames, catalog);
-
-            String displayName = rawName.trim();
-            String key = normalized;
-
-            result.merge(key, new FoodTriedResponse(displayName, category, lastDate, (int) count),
-                    (a, b) -> {
-                        a.setLastDate(b.getLastDate().isAfter(a.getLastDate()) ? b.getLastDate() : a.getLastDate());
-                        a.setTotalTimes(a.getTotalTimes() + b.getTotalTimes());
-                        return a;
-                    });
-        }
-
-        return new ArrayList<>(result.values());
+        return feedingRepository.findFoodsGrouped().stream()
+                .map(this::toFoodTriedResponse)
+                .collect(Collectors.toMap(
+                        r -> normalize(r.getName()),
+                        Function.identity(),
+                        this::merge,
+                        LinkedHashMap::new))
+                .values().stream()
+                .peek(r -> r.setCategory(resolveCategory(normalize(r.getName()), catalog)))
+                .toList();
     }
 
     public List<FoodItem> getCatalog() {
         return foodItemRepository.findAllByOrderByCategoryAscNameAsc();
     }
 
-    private FoodCategory matchCategory(String foodName, List<String> catalogNames, List<FoodItem> catalog) {
-        for (int i = 0; i < catalogNames.size(); i++) {
-            if (foodName.contains(catalogNames.get(i))) {
-                return catalog.get(i).getCategory();
-            }
-        }
-        String singular = toSingular(foodName);
-        if (!singular.equals(foodName)) {
-            for (int i = 0; i < catalogNames.size(); i++) {
-                if (singular.contains(catalogNames.get(i))) {
-                    return catalog.get(i).getCategory();
-                }
-            }
-        }
-        return null;
+    private FoodTriedResponse toFoodTriedResponse(Object[] row) {
+        return new FoodTriedResponse(
+                ((String) row[0]).trim(),
+                null,
+                ((java.sql.Date) row[1]).toLocalDate(),
+                ((Long) row[2]).intValue());
+    }
+
+    private FoodTriedResponse merge(FoodTriedResponse a, FoodTriedResponse b) {
+        a.setLastDate(b.getLastDate().isAfter(a.getLastDate()) ? b.getLastDate() : a.getLastDate());
+        a.setTotalTimes(a.getTotalTimes() + b.getTotalTimes());
+        return a;
+    }
+
+    private FoodCategory resolveCategory(String normalized, Map<String, FoodCategory> catalog) {
+        return catalog.entrySet().stream()
+                .filter(e -> normalized.contains(e.getKey()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(null);
     }
 
     private static String normalize(String s) {
-        String lower = s.toLowerCase().trim();
-        return Normalizer.normalize(lower, Normalizer.Form.NFD)
+        return Normalizer.normalize(s.toLowerCase().trim(), Normalizer.Form.NFD)
                 .replaceAll("\\p{InCombiningDiacriticalMarks}", "");
-    }
-
-    private static String toSingular(String s) {
-        if (s.endsWith("ces")) {
-            return s.substring(0, s.length() - 3) + "z";
-        }
-        if (s.endsWith("es")) {
-            return s.substring(0, s.length() - 2);
-        }
-        if (s.endsWith("s")) {
-            return s.substring(0, s.length() - 1);
-        }
-        return s;
     }
 }

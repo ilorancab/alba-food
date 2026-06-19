@@ -97,10 +97,12 @@ INSERT INTO food_items (name, category) VALUES
 ('cuajada', 'DAIRY'),
 -- Cereales
 ('arroz', 'CEREAL'),
+('arroces', 'CEREAL'),
+('maiz', 'CEREAL'),
+('maices', 'CEREAL'),
 ('pasta', 'CEREAL'),
 ('pan', 'CEREAL'),
 ('avena', 'CEREAL'),
-('maiz', 'CEREAL'),
 ('quinoa', 'CEREAL'),
 ('couscous', 'CEREAL'),
 ('semola', 'CEREAL'),
