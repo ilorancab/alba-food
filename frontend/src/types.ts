@@ -27,3 +27,12 @@ export interface Week {
   start: string;
   label: string;
 }
+
+export type FoodCategory = 'VEGETABLE' | 'FRUIT' | 'MEAT' | 'FISH' | 'LEGUME' | 'DAIRY' | 'CEREAL' | 'OTHER';
+
+export interface FoodTried {
+  name: string;
+  category: FoodCategory | null;
+  lastDate: string;
+  totalTimes: number;
+}

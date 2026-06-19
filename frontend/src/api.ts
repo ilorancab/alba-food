@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { FeedingEntry, FeedingFormData } from './types';
+import type { FeedingEntry, FeedingFormData, FoodTried } from './types';
 
 const API_BASE_URL = '/api/feedings';
 
@@ -29,4 +29,9 @@ export async function updateFeeding(entryId: number, entry: FeedingFormData): Pr
 
 export async function deleteFeeding(id: number): Promise<void> {
   await axios.delete(`${API_BASE_URL}/${id}`);
+}
+
+export async function fetchFoodsTried(): Promise<FoodTried[]> {
+  const response = await axios.get<FoodTried[]>('/api/foods/tried');
+  return response.data;
 }

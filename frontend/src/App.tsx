@@ -4,6 +4,7 @@ import { fetchFeedings, fetchConfig, createFeeding, updateFeeding, deleteFeeding
 import Header from './components/Header';
 import FeedingForm from './components/FeedingForm';
 import FeedingTable from './components/FeedingTable';
+import FoodCatalog from './components/FoodCatalog';
 
 function parseLocalDate(dateStr: string): Date {
   const [year, month, day] = dateStr.split('-').map(Number);
@@ -31,6 +32,7 @@ const emptyForm: FeedingFormData = {
 };
 
 export default function App() {
+  const [tab, setTab] = useState<'registry' | 'foods'>('registry');
   const [feedings, setFeedings] = useState<FeedingEntry[]>([]);
   const [formData, setFormData] = useState<FeedingFormData>(emptyForm);
   const [loading, setLoading] = useState(true);
@@ -186,26 +188,55 @@ export default function App() {
       <Header babyName={babyName} darkMode={darkMode} onToggleDarkMode={() => setDarkMode((prev) => !prev)} />
 
       <main className="max-w-4xl mx-auto space-y-8">
-        <FeedingForm
-          formData={formData}
-          isDuplicating={isDuplicating}
-          onSubmit={handleSubmit}
-          onChange={handleInputChange}
-          onCancel={handleCancelEdit}
-        />
+        <div className="flex gap-1 bg-white dark:bg-slate-800 rounded-2xl p-1 border-2 border-pink-100 dark:border-slate-700 shadow-lg">
+          <button
+            onClick={() => setTab('registry')}
+            className={`flex-1 py-3 rounded-xl font-bold text-sm transition duration-200 ${
+              tab === 'registry'
+                ? 'bg-pink-500 text-white shadow-md'
+                : 'text-pink-500 dark:text-pink-400 hover:bg-pink-50 dark:hover:bg-slate-700'
+            }`}
+          >
+            📋 Registro de Tomas
+          </button>
+          <button
+            onClick={() => setTab('foods')}
+            className={`flex-1 py-3 rounded-xl font-bold text-sm transition duration-200 ${
+              tab === 'foods'
+                ? 'bg-pink-500 text-white shadow-md'
+                : 'text-pink-500 dark:text-pink-400 hover:bg-pink-50 dark:hover:bg-slate-700'
+            }`}
+          >
+            🥗 Alimentos Probados
+          </button>
+        </div>
 
-        <FeedingTable
-          feedings={sortedFeedings}
-          loading={loading}
-          sortConfig={sortConfig}
-          weeks={weeks}
-          selectedWeek={selectedWeek}
-          onSort={handleSort}
-          onWeekChange={setSelectedWeek}
-          onEdit={editEntry}
-          onDuplicate={duplicateEntry}
-          onDelete={deleteEntry}
-        />
+        {tab === 'registry' ? (
+          <>
+            <FeedingForm
+              formData={formData}
+              isDuplicating={isDuplicating}
+              onSubmit={handleSubmit}
+              onChange={handleInputChange}
+              onCancel={handleCancelEdit}
+            />
+
+            <FeedingTable
+              feedings={sortedFeedings}
+              loading={loading}
+              sortConfig={sortConfig}
+              weeks={weeks}
+              selectedWeek={selectedWeek}
+              onSort={handleSort}
+              onWeekChange={setSelectedWeek}
+              onEdit={editEntry}
+              onDuplicate={duplicateEntry}
+              onDelete={deleteEntry}
+            />
+          </>
+        ) : (
+          <FoodCatalog />
+        )}
       </main>
 
       <footer className="mt-12 text-center text-pink-300 dark:text-slate-500 text-sm">
