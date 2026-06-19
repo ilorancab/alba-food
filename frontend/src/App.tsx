@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { FeedingEntry, FeedingFormData, SortConfig, Week } from './types';
-import { fetchFeedings, fetchConfig, saveFeeding, deleteFeeding } from './api';
+import { fetchFeedings, fetchConfig, createFeeding, updateFeeding, deleteFeeding } from './api';
 import Header from './components/Header';
 import FeedingForm from './components/FeedingForm';
 import FeedingTable from './components/FeedingTable';
@@ -123,7 +123,11 @@ export default function App() {
     async (e: React.FormEvent) => {
       e.preventDefault();
       try {
-        await saveFeeding(formData);
+        if (formData.id) {
+          await updateFeeding(formData.id, formData);
+        } else {
+          await createFeeding(formData);
+        }
         const data = await fetchFeedings();
         setFeedings(data);
         setIsDuplicating(false);

@@ -1,46 +1,60 @@
 package com.albafood.service;
 
+import com.albafood.dto.FeedingRequest;
+import com.albafood.dto.FeedingResponse;
 import com.albafood.entity.FeedingEntry;
 import com.albafood.repository.FeedingRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class FeedingService {
 
-    @Autowired
-    private FeedingRepository feedingRepository;
+    private final FeedingRepository feedingRepository;
 
-    public List<FeedingEntry> getAllEntries() {
-        return feedingRepository.findAll();
+    public FeedingService(FeedingRepository feedingRepository) {
+        this.feedingRepository = feedingRepository;
     }
 
-    public List<FeedingEntry> getEntryByDate(LocalDate date) {
-        return feedingRepository.findByDate(date);
+    public List<FeedingResponse> getAllEntries() {
+        return feedingRepository.findAll()
+                .stream()
+                .map(FeedingResponse::fromEntity)
+                .toList();
     }
 
-    public FeedingEntry saveOrUpdateEntry(FeedingEntry entry) {
-        if (entry.getId() != null) {
-            Optional<FeedingEntry> existing = feedingRepository.findById(entry.getId());
-            if (existing.isPresent()) {
-                FeedingEntry current = existing.get();
-                current.setDate(entry.getDate());
-                current.setFood(entry.getFood());
-                current.setQuantity(entry.getQuantity());
-                current.setReaction(entry.getReaction());
-                current.setObservations(entry.getObservations());
-                return feedingRepository.save(current);
-            }
-        }
-        entry.setId(null);
-        return feedingRepository.save(entry);
+    public List<FeedingResponse> getEntryByDate(LocalDate date) {
+        return feedingRepository.findByDate(date)
+                .stream()
+                .map(FeedingResponse::fromEntity)
+                .toList();
+    }
+
+    public FeedingResponse createEntry(FeedingRequest request) {
+        FeedingEntry entry = new FeedingEntry();
+        applyRequest(entry, request);
+        return FeedingResponse.fromEntity(feedingRepository.save(entry));
+    }
+
+    public FeedingResponse updateEntry(Long id, FeedingRequest request) {
+        FeedingEntry entry = feedingRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("FeedingEntry not found with id: " + id));
+        applyRequest(entry, request);
+        return FeedingResponse.fromEntity(feedingRepository.save(entry));
     }
 
     public void deleteEntry(Long id) {
         feedingRepository.deleteById(id);
+    }
+
+    private void applyRequest(FeedingEntry entry, FeedingRequest request) {
+        entry.setDate(request.getDate());
+        entry.setFood(request.getFood());
+        entry.setQuantity(request.getQuantity());
+        entry.setReaction(request.getReaction());
+        entry.setObservations(request.getObservations());
     }
 }

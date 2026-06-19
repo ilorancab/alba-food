@@ -13,8 +13,17 @@ export async function fetchConfig(): Promise<{ babyName: string }> {
   return response.data;
 }
 
-export async function saveFeeding(entry: FeedingFormData): Promise<FeedingEntry> {
-  const response = await axios.post<FeedingEntry>(API_BASE_URL, entry);
+export async function createFeeding(entry: FeedingFormData): Promise<FeedingEntry> {
+  const { id: _unused, ...body } = entry;
+  void _unused;
+  const response = await axios.post<FeedingEntry>(API_BASE_URL, body);
+  return response.data;
+}
+
+export async function updateFeeding(entryId: number, entry: FeedingFormData): Promise<FeedingEntry> {
+  const { id: _unused, ...body } = entry;
+  void _unused;
+  const response = await axios.put<FeedingEntry>(`${API_BASE_URL}/${entryId}`, body);
   return response.data;
 }
 
