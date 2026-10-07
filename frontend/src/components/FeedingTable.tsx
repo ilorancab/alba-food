@@ -1,4 +1,4 @@
-import { ClipboardList } from 'lucide-react';
+import { ClipboardList, Download } from 'lucide-react';
 import type { FeedingEntry, SortConfig } from '../types';
 import WeekSelector from './WeekSelector';
 import type { Week } from '../types';
@@ -48,7 +48,17 @@ export default function FeedingTable({
         <h2 className="text-2xl font-semibold text-gray-700 dark:text-slate-200 flex items-center gap-2">
           <ClipboardList className="text-pink-500 dark:text-pink-400" /> Historial
         </h2>
-        <WeekSelector weeks={weeks} selectedWeek={selectedWeek} onChange={onWeekChange} />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <a
+            href="/api/feedings/export"
+            download
+            title="Descargar todo el historial en CSV"
+            className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-900/50 hover:bg-indigo-100 dark:hover:bg-indigo-950 transition duration-200"
+          >
+            <Download size={16} /> Exportar CSV
+          </a>
+          <WeekSelector weeks={weeks} selectedWeek={selectedWeek} onChange={onWeekChange} />
+        </div>
       </div>
 
       <div className="overflow-x-auto">

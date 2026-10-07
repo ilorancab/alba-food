@@ -5,6 +5,7 @@ import com.albafood.dto.FeedingResponse;
 import com.albafood.entity.FeedingEntry;
 import com.albafood.repository.FeedingRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -48,6 +49,30 @@ public class FeedingService {
 
     public void deleteEntry(Long id) {
         feedingRepository.deleteById(id);
+    }
+
+    public String exportCsv() {
+        List<FeedingEntry> entries = feedingRepository.findAll(Sort.by(Sort.Direction.ASC, "date", "id"));
+
+        StringBuilder csv = new StringBuilder("Fecha;Alimento;Cantidad;Reacción;Observaciones\r\n");
+        for (FeedingEntry entry : entries) {
+            csv.append(escapeCsv(entry.getDate().toString())).append(';')
+                    .append(escapeCsv(entry.getFood())).append(';')
+                    .append(escapeCsv(entry.getQuantity())).append(';')
+                    .append(escapeCsv(entry.getReaction())).append(';')
+                    .append(escapeCsv(entry.getObservations())).append("\r\n");
+        }
+        return csv.toString();
+    }
+
+    private String escapeCsv(String value) {
+        if (value == null) {
+            return "";
+        }
+        if (value.contains(";") || value.contains("\"") || value.contains("\n") || value.contains("\r")) {
+            return "\"" + value.replace("\"", "\"\"") + "\"";
+        }
+        return value;
     }
 
     private void applyRequest(FeedingEntry entry, FeedingRequest request) {

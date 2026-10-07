@@ -2,6 +2,9 @@ IMAGE     ?= ilbravo/alba-food
 PLATFORMS ?= linux/amd64,linux/arm64
 BUILDER   ?= mybuilder
 
+# mvn necesita un JDK completo: el `java` por defecto de esta máquina es un JRE sin javac
+JDK := $(shell dirname $(shell dirname $(shell readlink -f $(shell command -v javac))))
+
 .DEFAULT_GOAL := help
 
 .PHONY: help release up down db build logs run
@@ -30,4 +33,4 @@ logs: ## Sigue los logs de la app local
 	docker compose logs -f app
 
 run: db ## Arranca la app con Maven en local (necesita el puerto 8080 libre: make down)
-	mvn spring-boot:run
+	JAVA_HOME="$(JDK)" mvn spring-boot:run
