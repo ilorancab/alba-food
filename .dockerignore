@@ -1,0 +1,14 @@
+.git
+.gitignore
+.idea
+.mvn
+.vscode
+
+target/
+frontend/node_modules/
+frontend/dist/
+
+Dockerfile
+docker-compose.yml
+*.md
+*.log

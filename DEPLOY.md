@@ -30,6 +30,8 @@ docker buildx build --platform linux/amd64,linux/arm64 \
   -t <DOCKER_HUB_USERNAME>/alba-food:latest --push .
 ```
 
+Shortcut: `make release` runs the two commands above from the project `Makefile`.
+
 ## 3. Configuration on the Raspberry Pi (OMV / Portainer)
 
 Create a new **Stack** in Portainer or a `docker-compose.yml` file on your Raspberry Pi with the following content.
@@ -95,6 +97,8 @@ docker buildx use mybuilder
 docker buildx build --platform linux/amd64,linux/arm64 \
   -t <DOCKER_HUB_USERNAME>/alba-food:latest --push .
 ```
+
+Shortcut: `make release` does both steps and warns you if you have uncommitted changes.
 
 ### Step B: Update the Raspberry Pi (OMV/Portainer)
 To pull the new version on the Raspberry Pi:
